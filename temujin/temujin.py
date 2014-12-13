@@ -160,6 +160,22 @@ class Upload(Resource):
         file.save(os.path.join(savepath, filename))
         return photo_hash, 201
 
+# Upload multiple files
+class Upload2(Resource):
+    def post(self):
+        files = request.files.getlist('files[]')
+        photo_hash = str(md5(str(files[0])).hexdigest())
+        savepath = app.config['UPLOAD_FOLDER'] + photo_hash + '/'
+        if not os.path.exists(os.path.dirname(savepath)):
+            os.makedirs(os.path.dirname(savepath))
+
+        for file in files:
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(savepath, filename))
+
+        return photo_hash, 201
+
 # Create post
 class PostCreate(Resource):
     def post(self, photo_hash):
@@ -177,15 +193,18 @@ class Posts(Resource):
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
-        file = request.files['file']
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            savepath = app.config['UPLOAD_FOLDER'] + str(md5(str(file)).hexdigest()) + '/'
-            if not os.path.exists(os.path.dirname(savepath)):
-                os.makedirs(os.path.dirname(savepath))
+        files = request.files.getlist('files[]')
+        photo_hash = str(md5(str(files[0])).hexdigest())
+        savepath = app.config['UPLOAD_FOLDER'] + photo_hash + '/'
+        if not os.path.exists(os.path.dirname(savepath)):
+            os.makedirs(os.path.dirname(savepath))
 
-            file.save(os.path.join(savepath, filename))
-            return 'ok' + str(os.path.join(app.config['UPLOAD_FOLDER']))
+        for file in files:
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(savepath, filename))
+        
+        return 'ok all images' + str(os.path.join(app.config['UPLOAD_FOLDER']))
 
 ##
 ## Actually setup the Api resource routing here
@@ -194,6 +213,7 @@ api.add_resource(Posts, '/posts')
 api.add_resource(Post, '/post/<int:post_id>')
 api.add_resource(PostCreate, '/post/create/<string:photo_hash>')
 api.add_resource(Upload, '/upload')
+api.add_resource(Upload2, '/2')
 
 if __name__ == '__main__':
     init_db()
