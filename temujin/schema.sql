@@ -9,7 +9,7 @@ create table user (
 drop table if exists post;
 create table post (
   post_id integer primary key autoincrement,
-  user_id integer not null,
+  user_id integer,
   pub_date integer,
   comment text,
   photo_url text,

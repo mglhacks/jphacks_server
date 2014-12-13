@@ -14,6 +14,8 @@ from flask.ext.restful import reqparse, abort, Api, Resource
 # other imports
 import urllib, urllib2
 import time
+#import util
+import json
 from sqlite3 import dbapi2 as sqlite3
 from hashlib import md5
 from datetime import datetime
@@ -63,10 +65,11 @@ def query_db(query, args=(), one=False):
     rv = cur.fetchall()
     return (rv[0] if rv else None) if one else rv
 
-def add_post(post_id):
-	user_id = 0
+
+def add_post(post_id, comment):
+	user_id = None
 	pub_date = int(time.time())
-	comment = "test comment"
+	# comment = "test comment"
 	photo_url = "photo_url"
 	autodesk_url = "autodesk_url"
 	db = get_db()
@@ -74,8 +77,7 @@ def add_post(post_id):
 		values (?,?,?,?,?,?)''', [post_id, user_id, pub_date, comment, photo_url, autodesk_url])
 	db.commit()
 	flash('Your post added to db.')
-
-	return 'post added'
+	return 'post added.'
 
 def get_post(post_id):
 	post = query_db('''select * from post where post.post_id = ?''', [post_id], one=True)
@@ -90,8 +92,10 @@ class Post(Resource):
         return 'ok' + str(post['post_id']) + post['comment'], 201
 
     def post(self, post_id):
-    	return add_post(post_id)
-
+		# Read post body json
+		content_json = json.loads(request.data)
+		return add_post(post_id, content_json['message'])
+		#return str(request.form), 201
 
 
 
