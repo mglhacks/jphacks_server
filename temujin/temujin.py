@@ -144,8 +144,7 @@ class Post(Resource):
 
 
 
-# Upload
-# creates post
+# Upload single file
 class Upload(Resource):
     def post(self):
 
@@ -212,8 +211,8 @@ def upload_file():
 api.add_resource(Posts, '/posts')
 api.add_resource(Post, '/post/<int:post_id>')
 api.add_resource(PostCreate, '/post/create/<string:photo_hash>')
-api.add_resource(Upload, '/upload')
-api.add_resource(Upload2, '/2')
+api.add_resource(Upload, '/upload_single')
+api.add_resource(Upload2, '/upload')
 
 if __name__ == '__main__':
     init_db()
