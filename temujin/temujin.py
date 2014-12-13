@@ -14,11 +14,14 @@ from flask.ext.restful import reqparse, abort, Api, Resource
 # other imports
 import urllib, urllib2
 import time
-#import util
 import json
 from sqlite3 import dbapi2 as sqlite3
 from hashlib import md5
 from datetime import datetime
+
+# user library
+#from post_helper.py import *
+#from database_helper.py import *
 
 # configuration
 DATABASE = '/tmp/temujin.db'
@@ -46,7 +49,7 @@ def close_database(exception):
     """Closes the database again at the end of the request."""
     top = _app_ctx_stack.top
     if hasattr(top, 'sqlite_db'):
-    	top.sqlite_db.close()
+        top.sqlite_db.close()
 
 
 def init_db():
@@ -65,37 +68,70 @@ def query_db(query, args=(), one=False):
     rv = cur.fetchall()
     return (rv[0] if rv else None) if one else rv
 
-
-def add_post(post_id, comment):
-	user_id = None
-	pub_date = int(time.time())
-	# comment = "test comment"
-	photo_url = "photo_url"
-	autodesk_url = "autodesk_url"
-	db = get_db()
-	db.execute('''insert into post (post_id, user_id, pub_date, comment, photo_url, autodesk_url)
-		values (?,?,?,?,?,?)''', [post_id, user_id, pub_date, comment, photo_url, autodesk_url])
-	db.commit()
-	flash('Your post added to db.')
-	return 'post added.'
+def add_post(content_json):
+    """Put json post data into database
+    post id is no included(autoincrement)
+    """
+    user_id = None
+    if 'user_id' in content_json: user_id = content_json['user_id']
+    pub_date = int(time.time())
+    comment = None
+    if 'comment' in content_json: comment = content_json['comment']
+    photo_url = "photo_url"
+    autodesk_url = "autodesk_url"
+    # inserting into db
+    db = get_db()
+    db.execute('''insert into post (user_id, pub_date, comment, photo_url, autodesk_url)
+        values (?,?,?,?,?)''', [user_id, pub_date, comment, photo_url, autodesk_url])
+    db.commit()
+    flash('Your post added to db.')
+    return 201
 
 def get_post(post_id):
-	post = query_db('''select * from post where post.post_id = ?''', [post_id], one=True)
-	return post
+    """Returns one post by post_id"""
+    post = query_db('''select * from post where post.post_id = ?''', [post_id], one=True)
+    return post
 
+def post_to_json(post):
+    post_as_dict = {
+        'post_id' : post['post_id'],
+        'user_id' : post['user_id'],
+        'pub_date' : post['pub_date'],
+        'comment' : post['comment'],
+        'photo_url' : post['photo_url'],
+        'autodesk_url' : post['autodesk_url']
+    }
+    return json.dumps(post_as_dict)
+
+def posts_to_json(posts):
+    post_as_dict = []
+
+    for post in posts:
+        post_as_dict = {
+            'post_id' : post['post_id'],
+            'user_id' : post['user_id'],
+            'pub_date' : post['pub_date'],
+            'comment' : post['comment'],
+            'photo_url' : post['photo_url'],
+            'autodesk_url' : post['autodesk_url']
+            }
+        posts_as_dict.append(post_as_dict)
+
+    return json.dumps(posts_as_dict)
 
 # Post
 #  returns post
 class Post(Resource):
     def get(self, post_id):
-    	post = get_post(post_id)
-        return 'ok' + str(post['post_id']) + post['comment'], 201
+        post = get_post(post_id)
+        json_dump = post_to_json(post)
+        return json_dump, 201
 
-    def post(self, post_id):
-		# Read post body json
-		content_json = json.loads(request.data)
-		return add_post(post_id, content_json['message'])
-		#return str(request.form), 201
+class Upload(Resource):
+    def post(self):
+        # Read post body json
+        content_json = json.loads(request.data)
+        return add_post(content_json)
 
 
 
@@ -104,8 +140,8 @@ class Post(Resource):
 ## Actually setup the Api resource routing here
 ##
 api.add_resource(Post, '/post/<int:post_id>')
-
+api.add_resource(Upload, '/upload')
 
 if __name__ == '__main__':
-	init_db()
-	app.run(debug=True)
+    init_db()
+    app.run(debug=True)
