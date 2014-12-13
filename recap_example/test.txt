@@ -1,0 +1,2 @@
+curl -k --header "Content-Type: application/json" --header "Authorization: Bearer lWgvfH4lSJeGPcjiChebVCcbEJA%3D" \
+--data "{\"clientID\":\"HvCWLgQHxXsjvZ6TY3TCq6XjqnI\",\"timestamp\":\"0\",\"sceneid\":\"test\"}" http://rc-api-adn.autodesk.com/3.1/API/photoscene
