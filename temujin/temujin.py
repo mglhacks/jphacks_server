@@ -31,7 +31,7 @@ DEBUG = True
 SECRET_KEY = 'burtechono'
 
 # upload config
-UPLOAD_FOLDER = './static'
+UPLOAD_FOLDER = './static/'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
 # create our little application :)
@@ -78,7 +78,7 @@ def query_db(query, args=(), one=False):
     rv = cur.fetchall()
     return (rv[0] if rv else None) if one else rv
 
-def add_post(content_json):
+def add_post(content_json, photo_hash):
     """Put json post data into database
     post id is no included(autoincrement)
     """
@@ -87,7 +87,7 @@ def add_post(content_json):
     pub_date = int(time.time())
     comment = None
     if 'comment' in content_json: comment = content_json['comment']
-    photo_url = "photo_url"
+    photo_url = app.config['UPLOAD_FOLDER'] + photo_hash + '/'
     autodesk_url = "autodesk_url"
     # inserting into db
     db = get_db()
@@ -142,22 +142,31 @@ class Post(Resource):
         json_dump = post_to_json(post)
         return json_dump, 201
 
+
+
 # Upload
 # creates post
 class Upload(Resource):
     def post(self):
-        # Read post body json
-        content_json = json.loads(request.data)
 
         file = request.files['file']
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            savepath = app.config['UPLOAD_FOLDER'] + str(md5(file))
+            photo_hash = str(md5(str(file)).hexdigest())
+            savepath = app.config['UPLOAD_FOLDER'] + photo_hash + '/'
             if not os.path.exists(os.path.dirname(savepath)):
                 os.makedirs(os.path.dirname(savepath))
 
         file.save(os.path.join(savepath, filename))
-        return add_post(content_json)
+        return photo_hash, 201
+
+# Create post
+class PostCreate(Resource):
+    def post(self, photo_hash):
+        # Read post body json
+        content_json = json.loads(request.data)
+        add_post(content_json, photo_hash)
+        return 'ok', 201
 
 # Posts
 # returns all posts
@@ -171,7 +180,7 @@ def upload_file():
         file = request.files['file']
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            savepath = app.config['UPLOAD_FOLDER'] + '/custom/'
+            savepath = app.config['UPLOAD_FOLDER'] + str(md5(str(file)).hexdigest()) + '/'
             if not os.path.exists(os.path.dirname(savepath)):
                 os.makedirs(os.path.dirname(savepath))
 
@@ -183,6 +192,7 @@ def upload_file():
 ##
 api.add_resource(Posts, '/posts')
 api.add_resource(Post, '/post/<int:post_id>')
+api.add_resource(PostCreate, '/post/create/<string:photo_hash>')
 api.add_resource(Upload, '/upload')
 
 if __name__ == '__main__':
