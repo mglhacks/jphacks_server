@@ -10,11 +10,12 @@ from flask import Flask, request, session, url_for, redirect, \
      render_template, abort, g, flash, _app_ctx_stack
 from werkzeug import check_password_hash, generate_password_hash
 from flask.ext.restful import reqparse, abort, Api, Resource
+from werkzeug import secure_filename
 
 # other imports
 import urllib, urllib2
 import time
-import json
+import json, os
 from sqlite3 import dbapi2 as sqlite3
 from hashlib import md5
 from datetime import datetime
@@ -29,10 +30,19 @@ PER_PAGE = 30
 DEBUG = True
 SECRET_KEY = 'burtechono'
 
+# upload config
+UPLOAD_FOLDER = './static'
+ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
+
 # create our little application :)
 app = Flask(__name__)
 app.config.from_object(__name__)
 api = Api(app)
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+
 
 def get_db():
     """Opens a new database connection if there is none yet for the
@@ -92,6 +102,11 @@ def get_post(post_id):
     post = query_db('''select * from post where post.post_id = ?''', [post_id], one=True)
     return post
 
+def get_posts():
+    """Returns all posts"""
+    posts = query_db('''select * from post''')
+    return posts
+
 def post_to_json(post):
     post_as_dict = {
         'post_id' : post['post_id'],
@@ -104,7 +119,7 @@ def post_to_json(post):
     return json.dumps(post_as_dict)
 
 def posts_to_json(posts):
-    post_as_dict = []
+    posts_as_dict = []
 
     for post in posts:
         post_as_dict = {
@@ -127,18 +142,46 @@ class Post(Resource):
         json_dump = post_to_json(post)
         return json_dump, 201
 
+# Upload
+# creates post
 class Upload(Resource):
     def post(self):
         # Read post body json
         content_json = json.loads(request.data)
+
+        file = request.files['file']
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            savepath = app.config['UPLOAD_FOLDER'] + str(md5(file))
+            if not os.path.exists(os.path.dirname(savepath)):
+                os.makedirs(os.path.dirname(savepath))
+
+        file.save(os.path.join(savepath, filename))
         return add_post(content_json)
 
+# Posts
+# returns all posts
+class Posts(Resource):
+    def get(self):
+        return posts_to_json(get_posts())
 
+@app.route('/', methods=['GET', 'POST'])
+def upload_file():
+    if request.method == 'POST':
+        file = request.files['file']
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            savepath = app.config['UPLOAD_FOLDER'] + '/custom/'
+            if not os.path.exists(os.path.dirname(savepath)):
+                os.makedirs(os.path.dirname(savepath))
 
+            file.save(os.path.join(savepath, filename))
+            return 'ok' + str(os.path.join(app.config['UPLOAD_FOLDER']))
 
 ##
 ## Actually setup the Api resource routing here
 ##
+api.add_resource(Posts, '/posts')
 api.add_resource(Post, '/post/<int:post_id>')
 api.add_resource(Upload, '/upload')
 
