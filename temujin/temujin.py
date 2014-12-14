@@ -6,11 +6,11 @@
 
 """
 # flask imports
-from flask import Flask, request, session, url_for, redirect, \
-     render_template, abort, g, flash, _app_ctx_stack
+from flask import Flask, request, session, url_for, redirect, render_template, abort, g, flash, _app_ctx_stack
 from werkzeug import check_password_hash, generate_password_hash
 from flask.ext.restful import reqparse, abort, Api, Resource
 from werkzeug import secure_filename
+import json
 
 # other imports
 import urllib, urllib2
@@ -189,7 +189,7 @@ class Posts(Resource):
     def get(self):
         return posts_to_json(get_posts())
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/2', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
         files = request.files.getlist('files[]')
@@ -204,6 +204,12 @@ def upload_file():
                 file.save(os.path.join(savepath, filename))
         
         return 'ok all images' + str(os.path.join(app.config['UPLOAD_FOLDER']))
+
+@app.route('/')
+def index():
+    list = json.loads(posts_to_json(get_posts()))
+    return render_template('index.html', data = list)
+            
 
 ##
 ## Actually setup the Api resource routing here

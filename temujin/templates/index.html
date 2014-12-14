@@ -1,0 +1,22 @@
+<title>MiniMax</title>
+<head>MiniMax</head>
+
+{% if data %}
+  {% for d in data %}
+    <p> post_id = {{d["post_id"]}} 
+        user_id = {{d["user_id"]}} 
+        pub_date = {{d["pub_date"]}} 
+        post_id = {{d["post_id"]}} 
+        comment = {{d["comment"]}} 
+        photo_url = {{d["photo_url"]}} 
+        autodesk_url = {{d["autodesk_url"]}} 
+    </p>
+    {% for i in range(1,10) %}  
+      <a href="/{{"%s" % d["photo_url"]}}{{"%d" % i}}.jpg">
+        {{i}}
+      </a>
+    {% endfor %}
+  {% endfor %}
+{% else %}
+  <p> No Data</p>
+{% endif %}
