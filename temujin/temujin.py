@@ -78,6 +78,41 @@ def query_db(query, args=(), one=False):
     rv = cur.fetchall()
     return (rv[0] if rv else None) if one else rv
 
+# user db functions
+def add_user(content_json, user_id):
+    # user_id
+    username = None
+    if 'username' in content_json: username = content_json['username']
+    profile_pic = None
+    if 'profile_pic' in content_json: profile_pic = content_json['profile_pic']    
+    email = None
+    if 'email' in content_json: email = content_json['email']    
+    pw_hash = None
+    if 'pw_hash' in content_json: pw_hash = content_json['pw_hash']    
+    # inserting into db
+    db = get_db()
+    db.execute('''insert into user (user_id, username, profile_pic, email, pw_hash)
+        values (?,?,?,?,?)''', [user_id, username, profile_pic, email, pw_hash])
+    db.commit()
+    flash('Your post added to db.')
+    return 201
+
+def get_user(user_id):
+    user = query_db('''select * from user where user.user_id = ?''', [user_id], one=True)
+    return user
+
+def user_to_json(post):
+    user_as_dict = {
+        'user_id' : post['user_id'],
+        'username' : post['username'],
+        'profile_pic' : post['profile_pic'],
+        'email' : post['email'],
+        'pw_hash' : post['pw_hash']
+    }
+    return json.dumps(user_as_dict)
+
+
+# post db functions
 def add_post(content_json, photo_hash):
     """Put json post data into database
     post id is no included(autoincrement)
@@ -88,11 +123,11 @@ def add_post(content_json, photo_hash):
     comment = None
     if 'comment' in content_json: comment = content_json['comment']
     photo_url = app.config['UPLOAD_FOLDER'] + photo_hash + '/'
-    autodesk_url = "autodesk_url"
+    obj_url = "obj_url"
     # inserting into db
     db = get_db()
-    db.execute('''insert into post (user_id, pub_date, comment, photo_url, autodesk_url)
-        values (?,?,?,?,?)''', [user_id, pub_date, comment, photo_url, autodesk_url])
+    db.execute('''insert into post (user_id, pub_date, comment, photo_url, obj_url)
+        values (?,?,?,?,?)''', [user_id, pub_date, comment, photo_url, obj_url])
     db.commit()
     flash('Your post added to db.')
     return 201
@@ -114,7 +149,7 @@ def post_to_json(post):
         'pub_date' : post['pub_date'],
         'comment' : post['comment'],
         'photo_url' : post['photo_url'],
-        'autodesk_url' : post['autodesk_url']
+        'obj_url' : post['obj_url']
     }
     return json.dumps(post_as_dict)
 
@@ -128,7 +163,7 @@ def posts_to_json(posts):
             'pub_date' : post['pub_date'],
             'comment' : post['comment'],
             'photo_url' : post['photo_url'],
-            'autodesk_url' : post['autodesk_url']
+            'obj_url' : post['obj_url']
             }
         posts_as_dict.append(post_as_dict)
 
@@ -141,7 +176,6 @@ class Post(Resource):
         post = get_post(post_id)
         json_dump = post_to_json(post)
         return json_dump, 201
-
 
 
 # Upload single file
@@ -189,6 +223,15 @@ class Posts(Resource):
     def get(self):
         return posts_to_json(get_posts())
 
+# User getter setter
+class User(Resource):
+    def get(self, user_id):
+        return user_to_json(get_user(user_id))
+    def post(self, user_id):
+        content_json = json.loads(request.data)
+        add_user(content_json, user_id)
+        return 'ok', 201
+
 @app.route('/2', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
@@ -219,7 +262,8 @@ api.add_resource(Post, '/post/<int:post_id>')
 api.add_resource(PostCreate, '/post/create/<string:photo_hash>')
 api.add_resource(Upload, '/upload_single')
 api.add_resource(Upload2, '/upload')
+api.add_resource(User, '/user/<int:user_id>')
 
 if __name__ == '__main__':
     init_db()
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0")
