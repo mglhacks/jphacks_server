@@ -1,2 +1,1 @@
-curl -k --header "Content-Type: application/json" --header "Authorization: Bearer lWgvfH4lSJeGPcjiChebVCcbEJA%3D" \
---data "{\"clientID\":\"HvCWLgQHxXsjvZ6TY3TCq6XjqnI\",\"timestamp\":\"0\",\"sceneid\":\"test\"}" http://rc-api-adn.autodesk.com/3.1/API/photoscene
+curl --data "client_id=m8oGWhzUpUG29kSbFi4WhW9DjXqM7MNj&client_secret=aH8BBLS4uP2RfQNq&grant_type=client_credentials" https://developer.api.autodesk.com/authentication/v1/authenticate --header "Content-Type: application/x-www-form-urlencoded" -k
