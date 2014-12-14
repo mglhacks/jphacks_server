@@ -1,0 +1,5 @@
+curl -XPOST -F "files[]=@1.jpg" -F "files[]=@2.jpg" -F "files[]=@3.jpg" -F "files[]=@4.jpg" -F "files[]=@5.jpg" -F "files[]=@6.jpg" -F "files[]=@7.jpg" -F "files[]=@8.jpg" -F "files[]=@9.jpg" localhost:5000/upload
+
+curl -i -XPOST -d '{"comment": "Captured Amazon Box", "user_id": "Tarou"}' -H "Content-Type: application/json" localhost:5000/post/create/36cd220726bdeff076f09c04a4c00f1b
+
+curl -i -XGET localhost:5000/posts

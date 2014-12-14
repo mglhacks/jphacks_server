@@ -1,22 +1,25 @@
-<title>MiniMax</title>
-<head>MiniMax</head>
+{% extends "layout.html" %}
+{% block body %}
 
-{% if data %}
-  {% for d in data %}
-    <p> post_id = {{d["post_id"]}} 
-        user_id = {{d["user_id"]}} 
-        pub_date = {{d["pub_date"]}} 
-        post_id = {{d["post_id"]}} 
-        comment = {{d["comment"]}} 
-        photo_url = {{d["photo_url"]}} 
-        autodesk_url = {{d["autodesk_url"]}} 
-    </p>
-    {% for i in range(1,10) %}  
-      <a href="/{{"%s" % d["photo_url"]}}{{"%d" % i}}.jpg">
-        {{i}}
-      </a>
+  {% if data %}
+    {% for d in data %}
+      <p> 
+          <span style="color:#088A85; font-weight:bold;">Mr.{{d["user_id"]}}</span>'s photo:
+      </p>
+
+      <image style="-webkit-user-select: none;" src = "/{{"%s" % d["photo_url"]}}5.jpg" height = "300">
+      <br>
+      <br>
+      <span style="color:green; font-weight:bold;">Photo Name:</span> <span style="color:red; font-style:italic;">{{d["comment"]}}</span>
+      <br>
+      <br>
+      {% for i in range(1,10) %}  
+        <a href="/{{"%s" % d["photo_url"]}}{{"%d" % i}}.jpg">
+          {{i}}
+        </a>
+      {% endfor %}
     {% endfor %}
-  {% endfor %}
-{% else %}
-  <p> No Data</p>
-{% endif %}
+  {% else %}
+    <p> No Data</p>
+  {% endif %}
+{% endblock %}

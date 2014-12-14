@@ -1,8 +1,18 @@
 <!doctype html>
-<title>jQuery Example</title>
-<script type=text/javascript
-  src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-<script type=text/javascript>
-  var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-</script>
-{% block body %}{% endblock %}
+<title>{% block title %}Welcome{% endblock %} | MiniMax</title>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<div class=page>
+  <h1><img src="static/minimax_logo_transparent.png" alt="The official MiniMax Icon" width = "30" height = "30">MiniMax</h1>
+  <div class=navigation>
+  </div>
+  <div class=body align = "middle">
+  {% block body %}{% endblock %}
+  </div>
+  <br>
+  <br>
+  <div class=footer>
+    <span style="font-family: 'Georgia', serif; margin: 0; color: #4796E9;font-style:italic;">
+    	<span style="color:#088A85; font-weight:bold;">MiniMax</span> 
+    	3D Application povered by <span style="color:red">Ants</span></span>
+  </div>
+</div>
