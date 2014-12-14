@@ -1,1 +1,9 @@
 // to do
+
+## token generate :
+
+curl --data "client_id=m8oGWhzUpUG29kSbFi4WhW9DjXqM7MNj&client_secret=aH8BBLS4uP2RfQNq&grant_type=client_credentials" https://developer.api.autodesk.com/authentication/v1/authenticate --header "Content-Type: application/x-www-form-urlencoded" -k
+
+## Caution : 
+
+Bucket name : [0-9][a-z]
