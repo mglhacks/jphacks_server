@@ -1,0 +1,15 @@
+
+申請ありがとうございます。
+下記が ReCap API で必要なキーになります。
+
+Consumer KeyConsumer Secret
+03e39c56-7889-4464-8c42-2271786e8672
+
+Consumer Secret
+44c1ac20-dc4c-4787-9368-378a8580b90f
+
+ReCap ClienID
+HvCWLgQHxXsjvZ6TY3TCq6XjqnI
+
+ReCap Key
+UoiMaqBv7S/jbmxqL6a4pFkYTKg 
