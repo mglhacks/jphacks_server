@@ -25,4 +25,7 @@
 {% endblock %}
 
 ## <div id="img"><img onclick="change()" style="-webkit-user-select: none;" src = "/{{"%s" % d["photo_url"]}}5.jpg" height = "300"" /></div>
-## <script>function change(){document.getElementById("img").innerHTML = <iframe src="to do" width="400" height="300" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"  frameborder="0"></iframe>;}</script>
+## <script type="text/javascript">
+## function change() {ReplaceContentInContainer('img1','<iframe src="%VARIABLE" width="400" height="300" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"  frameborder="0"></iframe>');}
+## function ReplaceContentInContainer(id, content){document.getElementById(id).innerHTML = content;}
+## </script>
