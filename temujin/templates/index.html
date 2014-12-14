@@ -7,7 +7,10 @@
           <span style="color:#088A85; font-weight:bold;">Mr.{{d["user_id"]}}</span>'s photo:
       </p>
 
-      <image style="-webkit-user-select: none;" src = "/{{"%s" % d["photo_url"]}}5.jpg" height = "300">
+      <div id="id{{d["user_id"]}}"><img onclick="toggle_visibility('id{{d["user_id"]}}', 'ix{{d["user_id"]}}');" style="-webkit-user-select: none;" src = "/{{"%s" % d["photo_url"]}}5.jpg" height = "300" />
+      </div>
+      <div id="ix{{d["user_id"]}}" style="display: none"><iframe src = "{{d["obj_url"]}}" width="400" height="300" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"  frameborder="0"></iframe></div>
+      
       <br>
       <br>
       <span style="color:green; font-weight:bold;">Photo Name:</span> <span style="color:#FAAC58; font-style:italic;">"{{d["comment"]}}"</span>
@@ -22,16 +25,14 @@
   {% else %}
     <p> No Data</p>
   {% endif %}
-{% endblock %}
 
-## <div id="id1"><img onclick="toggle_visibility('id1', 'id2');" style="-webkit-user-select: none;" "/{{"%s" % d["photo_url"]}}5.jpg" height = "300"" /></div>
-## <div id="id2" style="display: none"><iframe src = "/{{"%s" % d["autodesk_url"]}}" width="400" height="300" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"  frameborder="0"></iframe></div>
-
-## <script language="javascript">
-## function toggle_visibility(id1, id2) {  
+<script language="javascript">
+function toggle_visibility(id1, id2) {  
     var e = document.getElementById(id1);
     var e2 = document.getElementById(id2);
     e2.style.display = 'block';             
     e.style.display = 'none';
-## }
-## </script>
+}
+</script>
+
+{% endblock %}

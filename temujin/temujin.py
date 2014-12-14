@@ -123,7 +123,8 @@ def add_post(content_json, photo_hash):
     comment = None
     if 'comment' in content_json: comment = content_json['comment']
     photo_url = app.config['UPLOAD_FOLDER'] + photo_hash + '/'
-    obj_url = "obj_url"
+    obj_url = None
+    if 'obj_url' in content_json: obj_url = content_json['obj_url']
     # inserting into db
     db = get_db()
     db.execute('''insert into post (user_id, pub_date, comment, photo_url, obj_url)
@@ -195,10 +196,10 @@ class Upload(Resource):
 
 # Upload multiple files
 class Upload2(Resource):
-    def post(self):
+    def post(self, photo_path):
         files = request.files.getlist('files[]')
-        photo_hash = str(md5(str(files[0])).hexdigest())
-        savepath = app.config['UPLOAD_FOLDER'] + photo_hash + '/'
+        #photo_hash = str(md5(str(files[0])).hexdigest())
+        savepath = app.config['UPLOAD_FOLDER'] + photo_path + '/'
         if not os.path.exists(os.path.dirname(savepath)):
             os.makedirs(os.path.dirname(savepath))
 
@@ -207,7 +208,7 @@ class Upload2(Resource):
                 filename = secure_filename(file.filename)
                 file.save(os.path.join(savepath, filename))
 
-        return photo_hash, 201
+        return photo_path, 201
 
 # Create post
 class PostCreate(Resource):
@@ -284,7 +285,7 @@ api.add_resource(Posts, '/posts')
 api.add_resource(Post, '/post/<int:post_id>')
 api.add_resource(PostCreate, '/post/create/<string:photo_hash>')
 api.add_resource(Upload, '/upload_single')
-api.add_resource(Upload2, '/upload')
+api.add_resource(Upload2, '/upload/<string:photo_path>')
 api.add_resource(User, '/user/<int:user_id>')
 api.add_resource(Feed, '/feed')
 
