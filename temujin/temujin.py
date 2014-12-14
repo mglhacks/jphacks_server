@@ -6,7 +6,7 @@
 
 """
 # flask imports
-from flask import Flask, request, session, url_for, redirect, render_template, abort, g, flash, _app_ctx_stack
+from flask import Flask, request, session, url_for, redirect, render_template, abort, g, flash, _app_ctx_stack, jsonify
 from werkzeug import check_password_hash, generate_password_hash
 from flask.ext.restful import reqparse, abort, Api, Resource
 from werkzeug import secure_filename
@@ -139,7 +139,7 @@ def get_post(post_id):
 
 def get_posts():
     """Returns all posts"""
-    posts = query_db('''select * from post''')
+    posts = query_db('''select * from post order by post_id asc''')
     return posts
 
 def post_to_json(post):
@@ -232,6 +232,29 @@ class User(Resource):
         add_user(content_json, user_id)
         return 'ok', 201
 
+# Feed class for android
+class Feed(Resource):
+    def get(self):
+        posts = get_posts()
+        feed_all = []
+        # make feed json
+        for post in posts:
+            user = get_user(post['user_id'])
+            feed_element = {
+                'id' : post['post_id'],
+                'name' : user['username'],
+                'image' : post['photo_url'] + '5.jpg',
+                'status' : post['comment'],
+                'profilePic' : user['profile_pic'],
+                'timeStamp' : post['pub_date'],
+                'url' : None
+            }
+            feed_all.append(feed_element)
+        feed = { 'feed' : feed_all }
+        #return str(json.dumps(feed)).replace('\\\"', '"')
+        return jsonify(feed)
+
+
 @app.route('/2', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
@@ -263,6 +286,7 @@ api.add_resource(PostCreate, '/post/create/<string:photo_hash>')
 api.add_resource(Upload, '/upload_single')
 api.add_resource(Upload2, '/upload')
 api.add_resource(User, '/user/<int:user_id>')
+api.add_resource(Feed, '/feed')
 
 if __name__ == '__main__':
     init_db()
