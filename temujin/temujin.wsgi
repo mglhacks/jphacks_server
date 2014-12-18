@@ -1,3 +1,7 @@
-from temujin import app as application
+#!/usr/bin/python
 import sys
-sys.path.insert(0, '/path/to/jphacks_server/temujin')
+import logging
+#logging.basicConfig(stream=sys.sdterr)
+sys.path.insert(0, '/var/www/jphacks_server/temujin')
+
+from temujin import app as application
